@@ -7,4 +7,8 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="app_manager_lib_blue_trabsparent_60">#804262d5</color>
+    <color name="app_manager_lib_colorAccent">@color/app_manager_lib_blue_trabsparent_60</color>
+    <color name="app_manager_lib_primary_dark">#4262d5</color>
+    <color name="transparent">#00000000</color>
 </resources>

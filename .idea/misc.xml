@@ -3,6 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Android/project/demo/app/src/main/res/drawable/example_style.xml" value="0.1955" />
+        <entry key="..\:/Android/project/demo/app/src/main/res/layout/accessiblity_seeding_fragment_dialog.xml" value="0.2717391304347826" />
+        <entry key="..\:/Android/project/demo/app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="..\:/Android/project/demo/app/src/main/res/layout/activity_seeding_transparent.xml" value="0.2717391304347826" />
         <entry key="..\:/Project/Android/demo/app/src/main/res/layout/finger_switch_on_guide_layout.xml" value="0.3229166666666667" />
       </map>
     </option>

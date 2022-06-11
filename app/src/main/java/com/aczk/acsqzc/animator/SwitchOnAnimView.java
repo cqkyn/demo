@@ -16,14 +16,19 @@ import com.utils.ViewUtil;
 
 
 public class SwitchOnAnimView extends FrameLayout {
-    public static final int FINGER_ANIM_DURATION = 300;
-    public static final int CIRCLE_PT_ANIM_DURATION = 500;
-    public Handler mHandler;
-    public ImageView mCirclePtImgv;
-    public ImageView mFingerImgv;
-    public float mFingerMoveDistance;
-    public float mCirclePtMoveDistance;
-    public boolean isStopAnim;
+    private Handler mHandler = new Handler();
+    /** 开关中间的圆圈View */
+    private ImageView mCirclePtImgv;
+    /** 手指View */
+    private ImageView mFingerImgv;
+    /** 手指移动的距离 */
+    private float mFingerMoveDistance;
+    /** 开关中间的圆圈View需要移动的距离 */
+    private float mCirclePtMoveDistance;
+    private static final int FINGER_ANIM_DURATION = 300;
+    private static final int CIRCLE_PT_ANIM_DURATION = 500;
+
+    private boolean isStopAnim = false;
 
     public SwitchOnAnimView(Context context) {
         this(context, null);
@@ -31,70 +36,61 @@ public class SwitchOnAnimView extends FrameLayout {
 
     public SwitchOnAnimView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.mHandler = new Handler();
-        this.isStopAnim = false;
+        // 加载布局
         LayoutInflater.from(context).inflate(R.layout.finger_switch_on_guide_layout, this, true);
-        this.initView();
-    }
-
-    public static ImageView a(SwitchOnAnimView arg0) {
-        return arg0.mFingerImgv;
-    }
-
-    public void startAnim() {
-        this.isStopAnim = false;
-        ViewHelper.setTranslationX(this.mCirclePtImgv, 0.0f);
-        this.mCirclePtImgv.setBackgroundResource(R.mipmap.switch_off_circle_point);
-        this.mFingerImgv.setBackgroundResource(R.mipmap.finger_normal);
-        this.startFingerUpAnim();
-    }
-
-    public static Handler b(SwitchOnAnimView arg0) {
-        return arg0.mHandler;
-    }
-
-    public void stopAnim() {
-        this.isStopAnim = true;
-    }
-
-    public static ImageView c(SwitchOnAnimView arg0) {
-        return arg0.mCirclePtImgv;
+        initView();
     }
 
     private void initView() {
-        this.mCirclePtImgv = (ImageView)this.findViewById(R.id.switch_anim_circle_point);
-        this.mFingerImgv = (ImageView)this.findViewById(R.id.finger_switch);
-        this.mFingerMoveDistance = ViewUtil.dp2px(this.getContext(), 20.0f);
-        this.mCirclePtMoveDistance = ViewUtil.dp2px(this.getContext(), 17.5f);
+        mCirclePtImgv = (ImageView) findViewById(R.id.switch_anim_circle_point);
+        mFingerImgv = (ImageView) findViewById(R.id.finger_switch);
+
+        // 下面两个距离要根据UI布局来确定
+        mFingerMoveDistance = ViewUtil.dp2px(getContext(), 20f);
+        mCirclePtMoveDistance = ViewUtil.dp2px(getContext(), 17.5f);
     }
 
+    /**
+     * 启动动画
+     */
+    public void startAnim() {
+        isStopAnim = false;
+        // 启动动画之前先恢复初始状态
+        ViewHelper.setTranslationX(mCirclePtImgv, 0);
+        mCirclePtImgv.setBackgroundResource(R.mipmap.switch_off_circle_point);
+        mFingerImgv.setBackgroundResource(R.mipmap.finger_normal);
+        startFingerUpAnim();
+    }
+
+    /**
+     * 停止动画
+     */
+    public void stopAnim() {
+        isStopAnim = true;
+    }
+
+    /**
+     * 中间的圈点View平移动画
+     */
     private void startCirclePointAnim() {
-        ImageView mCirclePtImgv = this.mCirclePtImgv;
-        if(mCirclePtImgv == null) {
+        if (mCirclePtImgv == null) {
             return;
         }
-
-        ObjectAnimator circlePtAnim = ObjectAnimator.ofFloat(mCirclePtImgv, "translationX", new float[]{0.0f, this.mCirclePtMoveDistance});
-        circlePtAnim.setDuration(500L);
+        ObjectAnimator circlePtAnim = ObjectAnimator.ofFloat(mCirclePtImgv, "translationX", 0, mCirclePtMoveDistance);
+        circlePtAnim.setDuration(CIRCLE_PT_ANIM_DURATION);
         circlePtAnim.start();
     }
 
-    public static void d(SwitchOnAnimView arg0) {
-        arg0.startCirclePointAnim();
-    }
-
-    private void e() {
-        ImageView mFingerImgv = this.mFingerImgv;
-        if(mFingerImgv == null) {
-            return;
-        }
-
-        ObjectAnimator fingerUpAnim = ObjectAnimator.ofFloat(mFingerImgv, "translationY", new float[]{-this.mFingerMoveDistance, 0.0f});
-        fingerUpAnim.setDuration(300L);
+    /**
+     * 手指向上移动动画
+     */
+    private void startFingerUpAnim() {
+        ObjectAnimator fingerUpAnim = ObjectAnimator.ofFloat(mFingerImgv, "translationY", 0, -mFingerMoveDistance);
+        fingerUpAnim.setDuration(FINGER_ANIM_DURATION);
         fingerUpAnim.addListener(new BaseAnimatorListener() {
             @Override
             public void onAnimationEnd(Animator animator) {
-                if (mHandler == null) {
+                if (mFingerImgv == null || mHandler == null) {
                     return;
                 }
                 // 手指向上动画执行完成就设置手指View背景为点击状态的背景
@@ -114,8 +110,10 @@ public class SwitchOnAnimView extends FrameLayout {
                             @Override
                             public void run() {
                                 // 手指向下移动开始时设置手指背景为正常的状态
-                                mFingerImgv.setBackgroundResource(R.mipmap.finger_normal);
-                                startFingerUpAnim();
+                                if (mFingerImgv != null) {
+                                    mFingerImgv.setBackgroundResource(R.mipmap.finger_normal);
+                                }
+                                startFingerDownAnim();
                             }
                         }, 100);
                     }
@@ -125,13 +123,15 @@ public class SwitchOnAnimView extends FrameLayout {
         fingerUpAnim.start();
     }
 
-    public static void e(SwitchOnAnimView arg0) {
-        arg0.e();
-    }
-
-    private void startFingerUpAnim() {
-        ObjectAnimator fingerDownAnim = ObjectAnimator.ofFloat(this.mFingerImgv, "translationY", new float[]{0.0f, -this.mFingerMoveDistance});
-        fingerDownAnim.setDuration(300L);
+    /**
+     * 手指向下移动动画
+     */
+    private void startFingerDownAnim() {
+        if (mFingerImgv == null) {
+            return;
+        }
+        ObjectAnimator fingerDownAnim = ObjectAnimator.ofFloat(mFingerImgv, "translationY", -mFingerMoveDistance, 0);
+        fingerDownAnim.setDuration(FINGER_ANIM_DURATION);
         fingerDownAnim.addListener(new BaseAnimatorListener() {
             @Override
             public void onAnimationEnd(Animator animator) {
@@ -150,22 +150,18 @@ public class SwitchOnAnimView extends FrameLayout {
         fingerDownAnim.start();
     }
 
-    public static boolean f(SwitchOnAnimView arg0) {
-        return arg0.isStopAnim;
-    }
-
-    public void setFingerVisible(boolean arg2) {
-        int v0;
-        ImageView v2;
-        if(arg2) {
-            v2 = this.mFingerImgv;
-            v0 = VISIBLE;
-        } else {
-            v2 = this.mFingerImgv;
-            v0 = GONE;
-        }
-
-        v2.setVisibility(v0);
-    }
+//    public void setFingerVisible(boolean arg2) {
+//        int v0;
+//        ImageView v2;
+//        if(arg2) {
+//            v2 = this.mFingerImgv;
+//            v0 = VISIBLE;
+//        } else {
+//            v2 = this.mFingerImgv;
+//            v0 = GONE;
+//        }
+//
+//        v2.setVisibility(v0);
+//    }
 }
 
