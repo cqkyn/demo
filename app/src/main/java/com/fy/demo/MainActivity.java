@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onOpenTransClick(View view){
+        startActivityForResult(new Intent("android.settings.ACCESSIBILITY_SETTINGS"), 0);
         Intent intent = new Intent(MainActivity.this, TransparentActivity.class);
         intent.setFlags(0x10000000);
         this.startActivity(intent);
